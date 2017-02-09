@@ -12,3 +12,13 @@ Niculescu, Dragos, and Badri Nath. "Ad hoc positioning system (APS)." Global Tel
 and
 
 Niculescu, Dragos, and Badri Nath. "Ad hoc positioning system (APS) using AOA." INFOCOM 2003. Twenty-Second Annual Joint Conference of the IEEE Computer and Communications. IEEE Societies. Vol. 3. Ieee, 2003.
+
+# Usage
+First:
+  cd  aps/
+
+Now you can use either:
+  python aps.y <options>
+
+or:
+  sh run.sh <config> <options>
