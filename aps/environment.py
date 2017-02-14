@@ -10,16 +10,16 @@ from landmark import Landmark
 from gbls import *
 
 sys.path.append("../common/")
-import action_base
-import node_base
+import EnvBase
 
-class Environment:
+class Environment(EnvBase.EnvBase):
     def __init__(self, nc, lc, size, max_hop, method, npos, lpos):
+        EnvBase.EnvBase.__init__(self)
+
         self.size           = float(size)
         self.max_hop        = float(max_hop)
         self.normal_nodes   = len(npos)
         self.landmark_nodes = len(lpos)
-        self.action_manager = action_base.ActionManager()
 
         self.method         = method
         self.est_err        = 1.0
@@ -31,39 +31,13 @@ class Environment:
         self.fps_clock      = pygame.time.Clock()
         pygame.display.set_caption("APS Simulation")
 
-        # init nodes
-        self.nodes          = list()
-
         # add normal nodes
         for pos in npos:
-            self.nodes.append(Node(pos[0], pos[1], self.max_hop))
+            self.add_node(Node(pos[0], pos[1], self.max_hop))
 
         for pos in lpos:
-            self.nodes.append(Landmark(pos[0], pos[1], self.max_hop, self))
+            self.add_node(Landmark(pos[0], pos[1], self.max_hop, self))
 
-
-    def get_degree(self, atpos, ss):
-        degree = 0
-        # find nodes in range
-        for n in self.nodes:
-            # distance between broadcasting position and node
-            d = node_base.distance(atpos, n.pos)
-
-            # in range?
-            if d <= ss:
-                degree += 1
-        return degree
-
-    def broadcast(self, atpos, ss, data):
-        # find nodes in range
-        for n in self.nodes:
-            # distance between broadcasting position and node
-            d = node_base.distance(atpos, n.pos)
-
-            # in range?
-            if d <= ss:
-                # yes
-                n.receive(self, data)
 
     def handle_input(self):
         pygame.event.pump()
@@ -74,8 +48,10 @@ class Environment:
                 break
 
     def update(self):
-        self.action_manager.tick()
-        if self.action_manager.empty():
+        try:
+            self.tick()
+        except EnvBase.EmptyScheduler:
+            print "-- EmptyScheduler --"
             self.do_update = False
 
             # average degree of nodes

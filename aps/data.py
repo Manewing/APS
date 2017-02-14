@@ -12,7 +12,8 @@ class NodeTEntry:
         return NodeTEntry(self.landmark, self.x, self.y, self.value, self.sender)
 
     def dump(self):
-        print "NodeTEntry Data Packet: (L: ", self.landmark.id, ")( N:", self.sender.id, ")"
+        print "NodeTEntry Data Packet: (L: ", self.landmark.id, ")", \
+                "( N:", self.sender.id, ")"
         print "X:", self.x, "Y:", self.y, "Value:", self.value
 
 class Correction:
@@ -25,4 +26,5 @@ class Correction:
         return Correction(self.hopsize, self.landmark, self.number)
 
     def dump(self):
-        print "Correction Data Packet: (L:", self.landmark.id, "): ", self.number
+        print "Correction Data Packet: (L:", self.landmark.id, "): ", \
+                self.number

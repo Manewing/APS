@@ -6,6 +6,9 @@ import argparse
 
 from environment import Environment
 
+sys.path.append("../common/")
+from NodeBase import NodeBase
+
 from gbls import *
 
 # create list of uniformly distributed positions
@@ -127,9 +130,11 @@ if __name__ == "__main__":
     # get landmark positions
     lpos = pos[args.nodes:]
 
-    # set globals
-    Environment.DELAY       = args.delay
-
+    # add delay
+    NodeBase.PRC_DELAY_MIN += args.delay
+    NodeBase.PRC_DELAY_MAX += args.delay
+    NodeBase.BRC_DELAY_MIN += args.delay
+    NodeBase.BRC_DELAY_MAX += args.delay
 
 
     if args.cases == 1:
@@ -150,9 +155,9 @@ if __name__ == "__main__":
             total_est_err += env.est_err
             total_avg_deg += env.avg_deg
 
-        print "-----------------------------------------------"
+        print "--------------------------------------------------------------------------------"
         total_est_err /= args.cases
         total_avg_deg /= args.cases
         print "Average Estimation Error:", total_est_err, "Average node degree:", total_avg_deg
-        print "-----------------------------------------------"
+        print "--------------------------------------------------------------------------------"
 

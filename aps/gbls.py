@@ -1,4 +1,4 @@
-# Some globals
+# Some globals TODO <- remove ->
 import numpy as np
 import pygame
 
@@ -28,6 +28,5 @@ BLACK       = (  0,   0,   0, 0)
 WHITE       = (255, 255, 255, 0)
 
 ENV_OFF     = 100
-DELAY       = 45
 
 init()

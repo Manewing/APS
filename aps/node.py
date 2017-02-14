@@ -4,27 +4,17 @@ import random
 import numpy as np
 import pygame
 
-from action import *
 from data import *
 from gbls import *
 
 sys.path.append("../common/")
-import node_base
+from NodeBase import NodeBase
 
-class Node(node_base.node):
-
-    __ID = 0
+class Node(NodeBase):
 
     def __init__(self, x, y, ss):
-        # pass position in meters to parent
-        node_base.node.__init__(self, x, y)
-
-        # set id of node
-        self.id = Node.__ID
-        Node.__ID += 1
-
-        # signal strength in meters
-        self.ss = ss
+        # pass parameters to parent
+        NodeBase.__init__(self, x, y, ss)
 
         # hopsize (estimated)
         self.hopsize = 0
@@ -32,78 +22,15 @@ class Node(node_base.node):
         # reference of the last correction
         self.last_corr = None
 
-        # keep track of number queued broadcasts
-        self.broadcasts = 0
-
         # table for landmark information
         self.table = dict()
 
         # estimated position of node
         self.u = None
 
-        # degree of node
-        self.degree = 0
-
-    def determine_degree(self, env):
-        # get degree from Environment
-        self.degree = env.get_degree(self.pos, self.ss)
-
-    def schedule_broadcast(self, env, data):
-        # create new broadcast action
-        action = ActionBroadcast(self, env, data)
-
-        # schedule broadcast
-        env.action_manager.queue_random(action, DELAY, DELAY+5)
-
-        # increase number of queue broadcasts
-        self.broadcasts += 1
-
-    def broadcast(self, env, data):
-        # broadcast at node position with signal strength some data
-        env.broadcast(self.pos, self.ss, data)
-
-        # decrease number of queued broadcasts
-        self.broadcasts -= 1
-
-    def schedule_process(self, env, data):
-        # create new process action_manager
-        action = ActionProcess(self, env, data)
-
-        # schedule process
-        env.action_manager.queue_random(action, DELAY, DELAY+5)
-
     def process(self, env, data):
-        self.schedule_broadcast(env, data)
-
-    def valid_entry(self, data):
-        if not isinstance(data, NodeTEntry):
-            return False
-        if data.landmark in self.table:
-            return False
-        if data.landmark == self: # only landmarks True
-            return False
-        return True
-
-    def valid_correction(self, data):
-        if not isinstance(data, Correction):
-            return False
-
-        # initial correction
-        if self.last_corr == None:
-            self.last_corr = data
-            return True
-
-        if self.last_corr.landmark == data.landmark \
-                and self.last_corr.number < data.number:
-            self.last_corr = data
-            return True
-
-        return False
-
-
-    def receive(self, env, data):
         # we received data
-        if self.valid_entry(data):
+        if isinstance(data, NodeTEntry):
             #print "N:", self.id, "received new data packet (NodeTEntry)"
             #data.dump()
 
@@ -118,7 +45,7 @@ class Node(node_base.node):
             # schedule broadcast of new data
             self.schedule_broadcast(env, new_data)
 
-        elif self.valid_correction(data):
+        elif isinstance(data, Correction):
             #print "N:", self.id, "received new data packet (Correction)"
             #data.dump()
 
@@ -127,7 +54,7 @@ class Node(node_base.node):
 
             # schedule broadcast of copy of data
             new_data = data.copy()
-            self.schedule_process(env, new_data)
+            self.schedule_broadcast(env, new_data)
 
         else:
             # drop data
@@ -136,20 +63,39 @@ class Node(node_base.node):
 
         return
 
+    def is_valid(self, data):
+        # check if packet is node table entry
+        if isinstance(data, NodeTEntry):
+            if data.landmark in self.table:
+                return False
+            if data.landmark == self: # only landmarks True
+                return False
+            return True
+
+        # check if packet is correction
+        if isinstance(data, Correction):
+            # initial correction
+            if self.last_corr == None:
+                self.last_corr = data
+                return True
+            if self.last_corr.landmark == data.landmark \
+                    and self.last_corr.number < data.number:
+                self.last_corr = data
+                return True
+
+        # invalid packet
+        return False
+
+
     def set_random_pos(self, size):
         # assume random position
         self.u = np.array([rnd(size), rnd(size)])
 
     def calculate_position(self, method, size):
-        # clean distances and landmarks
-        self.landmarks = list()
-        self.landmark_dists = dict()
-
         # update distances of landmarks
         for landmark in self.table:
             entry = self.table[landmark]
-            self.landmarks.append(landmark)
-            self.landmark_dists[landmark] = entry.value * self.hopsize
+            self.add_landmark(landmark, entry.value * self.hopsize)
 
         try:
             self.u = self.triangulate(method)

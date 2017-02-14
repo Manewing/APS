@@ -16,17 +16,17 @@ class Landmark(Node):
         data = NodeTEntry(self, x, y, 0, self)
 
         # schedule broadcast
-        self.schedule_process(env, data)
+        self.schedule_broadcast(env, data)
 
     def calculate_position(self, method):
         pass # position is known
 
-    def receive(self, env, data):
+    def process(self, env, data):
         # we received data
-        if self.valid_entry(data):
+        if isinstance(data, NodeTEntry):
 
             # we received information of another landmark, forward it
-            Node.receive(self, env, data)
+            Node.process(self, env, data)
 
             # compute correction of hopsize
             h_sum = 0
@@ -39,7 +39,7 @@ class Landmark(Node):
 
             # schedule broadcast correction of hopsize
             data = Correction(self.hopsize, self, len(self.table))
-            self.schedule_process(env, data)
+            self.schedule_broadcast(env, data)
         else:
             # drop data
             #print "L:", self.id, "dropped data packet"
