@@ -51,7 +51,6 @@ class Environment(EnvBase.EnvBase):
         try:
             self.tick()
         except EnvBase.EmptyScheduler:
-            print "-- EmptyScheduler --"
             self.do_update = False
 
             # average degree of nodes
@@ -73,7 +72,6 @@ class Environment(EnvBase.EnvBase):
             self.avg_deg /= len(self.nodes)
 
             print "Estimation error:", self.est_err, "Node degree: ", self.avg_deg
-            print "--- DONE --- "
 
     def render_grid(self):
         global SMALL_FONT, BIG_FONT

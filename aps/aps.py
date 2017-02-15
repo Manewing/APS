@@ -109,7 +109,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-
     # check parameters
     if args.landmarks == 0:
         args.landmarks = int(float(args.nodes) * 0.3)
@@ -118,6 +117,7 @@ if __name__ == "__main__":
         raise ValueError("Invalid Method: " + args.method.upper())
 
     node_count = args.landmarks + args.nodes
+
     if args.isotropic:
         pos = create_isotropic(node_count, args.size)
     elif args.dist_file:
@@ -150,7 +150,19 @@ if __name__ == "__main__":
         total_est_err   = 0.0
         total_avg_deg   = 0.0
         total_avg_time  = 0.0
+        total_time      = time.time()
         for l in range(0, args.cases):
+            if args.isotropic:
+                pos = create_isotropic(node_count, args.size)
+            elif args.random:
+                pos = create_uniform(node_count, args.size)
+
+            # get node positions
+            npos = pos[:args.nodes]
+
+            # get landmark positions
+            lpos = pos[args.nodes:]
+
             env = Environment(args.nodes, args.landmarks, \
                     args.size, args.radio, args.method, npos, lpos)
             start = time.time()
@@ -164,7 +176,10 @@ if __name__ == "__main__":
         total_est_err   /= args.cases
         total_avg_deg   /= args.cases
         total_avg_time  /= args.cases
-        print "Average time elapsed:", total_avg_time
-        print "Average Estimation Error:", total_est_err, "Average node degree:", total_avg_deg
+        total_time       = time.time() - total_time
+        print "Total time elapsed       : %10.4f" % total_time
+        print "Average time elapsed     : %10.4f" % total_avg_time
+        print "Average Estimation Error : %10.4f" % total_est_err
+        print "Average node degree      : %10.4f" % total_avg_deg
         print "--------------------------------------------------------------------------------"
 

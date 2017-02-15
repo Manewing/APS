@@ -57,6 +57,29 @@ class EnvBase(object):
     def broadcast(self, at, ss, data):
         # register broadcast in statistics
         self.stats.broadcast(data)
+        # get key from arguments
+        key = (at[0], at[1], ss)
+
+        try:
+            nodes = self.__brc_cache[key]
+
+            # we did a broadcast with this configuration already
+            for n in nodes:
+                try:
+                    n.receive(self, data)
+                except NodeBase.InvalidPacket:
+                    pass # ignore
+        except KeyError:
+            # we dit not do a broadcast with this configuration
+            # build up cache
+            self.__cache_broadcast(at, ss, data)
+
+    def __cache_broadcast(self, at, ss, data):
+        # get key from arguments
+        key = (at[0], at[1], ss)
+
+        # node list to be cached
+        nodes = list()
 
         # find nodes in range
         for n in self.nodes:
@@ -66,10 +89,14 @@ class EnvBase(object):
             # in range?
             if d <= ss:
                 # yes
+                nodes.append(n)
                 try:
                     n.receive(self, data)
                 except NodeBase.InvalidPacket:
                     pass # ignore
+
+        # set up cache
+        self.__brc_cache[key] = nodes
 
     """
         Advance scheduler (action manager) by one tick
