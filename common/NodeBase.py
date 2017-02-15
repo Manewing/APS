@@ -35,7 +35,7 @@ class InvalidPacket(Exception):
     Base class for sensor node that allows receiving, processing and
     broadcasting as well as methods for triangulation.
 """
-class NodeBase:
+class NodeBase(object):
     __metaclass__ = ABCMeta
 
     # static node ID
@@ -69,16 +69,9 @@ class NodeBase:
         # keep track of the number of broadcasts
         self.broadcasts = 0
 
-        # degree of node
-        self.degree = 0
-
 
     # Network #
 
-
-    def determine_degree(self, env):
-        # get degree from Environment
-        self.degree = env.get_degree(self.pos, self.ss)
 
     def schedule_broadcast(self, env, data):
         # create new broadcast action

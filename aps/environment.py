@@ -22,8 +22,7 @@ class Environment(EnvBase.EnvBase):
         self.landmark_nodes = len(lpos)
 
         self.method         = method
-        self.est_err        = 1.0
-        self.avg_deg        = 0
+        self.stats.est_err  = 1.0
 
         self.running        = False
         self.do_update      = True
@@ -53,25 +52,19 @@ class Environment(EnvBase.EnvBase):
         except EnvBase.EmptyScheduler:
             self.do_update = False
 
-            # average degree of nodes
-            self.avg_deg = 0.0
-
             # estimate node positions
             est_err = np.array([0.0, 0.0])
             for n in self.nodes:
-                n.determine_degree(self)
-                self.avg_deg += n.degree
                 if isinstance(n, Landmark):
                     continue
                 n.calculate_position(self.method, self.size)
                 est_err += abs(n.pos - n.u) / float(n.ss)
 
             est_err /= self.normal_nodes
-            self.est_err = np.sqrt(np.dot(est_err, est_err))
+            self.stats.est_err = np.sqrt(np.dot(est_err, est_err))
 
-            self.avg_deg /= len(self.nodes)
-
-            print "Estimation error:", self.est_err, "Node degree: ", self.avg_deg
+            self.stats.dump()
+            print "Average estimation error         : %10.4f" % self.stats.est_err
 
     def render_grid(self):
         global SMALL_FONT, BIG_FONT

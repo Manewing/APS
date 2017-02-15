@@ -1,8 +1,13 @@
+# EnvBase #
+
 import numpy as np
 
 import NodeBase
 import ActionBase
 
+"""
+    Exception raised by EnvBase when scheduler is empty
+"""
 class EmptyScheduler(Exception):
     pass
 
@@ -14,8 +19,16 @@ class EnvStats(object):
         # packet type specific number of broadcasts
         self.broadcasts         = dict()
 
+        # node degrees
+        self.node_degrees       = dict()
+
     def dump(self):
-        pass #TODO
+        print "Total number of broadcasts       : %10.4f" % self.total_broadcasts
+        for dt, brcs in self.broadcasts.iteritems():
+            dt = str(dt)
+            dt = dt[dt.rfind('.')+1:dt.rfind("'")]
+            print "Broadcasts of %-19s: %10.4f" % (dt, brcs)
+        print "Average node degree              : %10.4f" % self.average_degree()
 
     def broadcast(self, data):
         self.total_broadcasts += 1
@@ -23,6 +36,15 @@ class EnvStats(object):
             self.broadcasts[type(data)] += 1
         except KeyError:
             self.broadcasts[type(data)] = 1
+
+    def set_degree(self, at, dg):
+        self.node_degrees[(at[0], at[1])] = dg
+
+    def average_degree(self):
+        avg_deg = 0.0
+        for k,dg in self.node_degrees.iteritems():
+            avg_deg += dg
+        return avg_deg / len(self.node_degrees)
 
 """
     Environment base
@@ -74,6 +96,10 @@ class EnvBase(object):
             # build up cache
             self.__cache_broadcast(at, ss, data)
 
+    """
+        Cache nodes which are in range of signal (strength: 'ss')
+        at position 'at' while performing broadcast
+    """
     def __cache_broadcast(self, at, ss, data):
         # get key from arguments
         key = (at[0], at[1], ss)
@@ -98,6 +124,10 @@ class EnvBase(object):
         # set up cache
         self.__brc_cache[key] = nodes
 
+        # also set degree of node in stats
+        self.stats.set_degree(at, len(nodes))
+
+
     """
         Advance scheduler (action manager) by one tick
     """
@@ -106,20 +136,4 @@ class EnvBase(object):
 
         if self.action_manager.empty():
             raise EmptyScheduler # signal no more actions left
-
-    """
-        Get the (node) degree at the given position 'at'
-        with signal strength 'ss'
-    """
-    def get_degree(self, at, ss):
-        degree = 0
-        # find nodes in range
-        for n in self.nodes:
-            # distance between broadcasting position and node
-            d = NodeBase.distance(at, n.pos)
-
-            # in range?
-            if d <= ss:
-                degree += 1
-        return degree
 

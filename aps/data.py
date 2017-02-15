@@ -1,6 +1,6 @@
 # Data Packets
 
-class NodeTEntry:
+class NodeTEntry(object):
     def __init__(self, landmark, x, y, value, sender):
         self.landmark   = landmark
         self.x          = x
@@ -16,7 +16,7 @@ class NodeTEntry:
                 "( N:", self.sender.id, ")"
         print "X:", self.x, "Y:", self.y, "Value:", self.value
 
-class Correction:
+class Correction(object):
     def __init__(self, hopsize, landmark, number):
         self.hopsize  = hopsize
         self.landmark = landmark

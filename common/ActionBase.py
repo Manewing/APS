@@ -2,7 +2,7 @@ import random
 from abc import ABCMeta, abstractmethod
 
 # Action Base Class
-class ActionBase:
+class ActionBase(object):
     __metaclass__ = ABCMeta
 
     def __init__(self, am):
@@ -30,7 +30,7 @@ class PeriodicAction(ActionBase):
     def execute(self):
         pass
 
-class ActionManager:
+class ActionManager(object):
     def __init__(self):
         self.__ticks        = 0
         self.__action_count = 0

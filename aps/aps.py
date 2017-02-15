@@ -150,8 +150,12 @@ if __name__ == "__main__":
         total_est_err   = 0.0
         total_avg_deg   = 0.0
         total_avg_time  = 0.0
+        total_avg_brcs  = 0.0
         total_time      = time.time()
         for l in range(0, args.cases):
+            print "--------------------------------------------------------------------------------"
+            print "Case: %10d" % l
+            print "--------------------------------------------------------------------------------"
             if args.isotropic:
                 pos = create_isotropic(node_count, args.size)
             elif args.random:
@@ -168,18 +172,22 @@ if __name__ == "__main__":
             start = time.time()
             env.run(False)
             end = time.time()
+            total_est_err  += env.stats.est_err
+            total_avg_deg  += env.stats.average_degree()
             total_avg_time += end - start
-            total_est_err  += env.est_err
-            total_avg_deg  += env.avg_deg
+            total_avg_brcs += env.stats.total_broadcasts
 
+        print "--------------------------------------------------------------------------------"
         print "--------------------------------------------------------------------------------"
         total_est_err   /= args.cases
         total_avg_deg   /= args.cases
         total_avg_time  /= args.cases
+        total_avg_brcs  /= args.cases
         total_time       = time.time() - total_time
-        print "Total time elapsed       : %10.4f" % total_time
-        print "Average time elapsed     : %10.4f" % total_avg_time
-        print "Average Estimation Error : %10.4f" % total_est_err
-        print "Average node degree      : %10.4f" % total_avg_deg
+        print "Total time elapsed               : %10.4f" % total_time
+        print "Average time elapsed             : %10.4f" % total_avg_time
+        print "Average estimation error         : %10.4f" % total_est_err
+        print "Average node degree              : %10.4f" % total_avg_deg
+        print "Average broadcasts               : %10.4f" % total_avg_brcs
         print "--------------------------------------------------------------------------------"
 
