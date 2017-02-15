@@ -29,11 +29,12 @@ class ActionProcess(ActionBase.ActionBase):
 class InvalidPacket(Exception):
     pass
 
-# Node Base
-#
-# Base class for sensor node that allows receiving, processing and
-# broadcasting as well as methods for triangulation.
-#
+"""
+    Node Base
+
+    Base class for sensor node that allows receiving, processing and
+    broadcasting as well as methods for triangulation.
+"""
 class NodeBase:
     __metaclass__ = ABCMeta
 
@@ -71,8 +72,6 @@ class NodeBase:
         # degree of node
         self.degree = 0
 
-        # carrier sense
-        self.carrier_sense = 0
 
     # Network #
 

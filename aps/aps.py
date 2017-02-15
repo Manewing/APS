@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import sys
+import time
 import random
 import argparse
 
@@ -146,18 +147,24 @@ if __name__ == "__main__":
             env.run(True)
 
     else:
-        total_est_err = 0.0
-        total_avg_deg = 0.0
+        total_est_err   = 0.0
+        total_avg_deg   = 0.0
+        total_avg_time  = 0.0
         for l in range(0, args.cases):
             env = Environment(args.nodes, args.landmarks, \
                     args.size, args.radio, args.method, npos, lpos)
+            start = time.time()
             env.run(False)
-            total_est_err += env.est_err
-            total_avg_deg += env.avg_deg
+            end = time.time()
+            total_avg_time += end - start
+            total_est_err  += env.est_err
+            total_avg_deg  += env.avg_deg
 
         print "--------------------------------------------------------------------------------"
-        total_est_err /= args.cases
-        total_avg_deg /= args.cases
+        total_est_err   /= args.cases
+        total_avg_deg   /= args.cases
+        total_avg_time  /= args.cases
+        print "Average time elapsed:", total_avg_time
         print "Average Estimation Error:", total_est_err, "Average node degree:", total_avg_deg
         print "--------------------------------------------------------------------------------"
 
