@@ -23,14 +23,14 @@ class Landmark(Node):
 
     def process(self, env, data):
         # we received data
-        if isinstance(data, NodeTEntry):
+        if isinstance(data, NodeTEntry) and self.is_valid_nte(data):
 
             # we received information of another landmark, forward it
             Node.process(self, env, data)
 
             # compute correction of hopsize
-            h_sum = 0
-            diff_sum = 0
+            h_sum = 1
+            diff_sum = 0.0
             for entry in self.table.values():
                 h_sum += entry.value
                 diff = self.pos - np.array([entry.x, entry.y])
