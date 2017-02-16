@@ -89,7 +89,7 @@ class NodeBase(object):
         self.broadcasts -= 1
 
         # broadcast at node position with signal strength some data
-        env.broadcast(self.pos, self.ss, data)
+        env.broadcast(self, data)
 
     def schedule_process(self, env, data):
         # create new process action_manager

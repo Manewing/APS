@@ -73,12 +73,15 @@ class EnvBase(object):
         self.nodes.append(node)
 
     """
-        Performs a broadcast at position 'at' of a data packet
-        'data' with a signal strength of 'ss'
+        Performs a broadcast by node 'node' with packet 'data'
     """
-    def broadcast(self, at, ss, data):
+    def broadcast(self, node,  data):
         # register broadcast in statistics
         self.stats.broadcast(data)
+        # get position
+        at = node.pos
+        # get signal strength
+        ss = node.ss
         # get key from arguments
         key = (at[0], at[1], ss)
 
