@@ -30,7 +30,7 @@ class Node(NodeBase):
 
     def process(self, env, data):
         # we received data
-        if isinstance(data, NodeTEntry):
+        if isinstance(data, NodeTEntry) and self.is_valid_nte(data):
             #print "N:", self.id, "received new data packet (NodeTEntry)"
             #data.dump()
 
@@ -45,9 +45,12 @@ class Node(NodeBase):
             # schedule broadcast of new data
             self.schedule_broadcast(env, new_data)
 
-        elif isinstance(data, Correction):
+        elif isinstance(data, Correction) and self.is_valid_cor(data):
             #print "N:", self.id, "received new data packet (Correction)"
             #data.dump()
+
+            # set last correction
+            self.last_corr = data
 
             # update hopsize
             self.hopsize = data.hopsize
@@ -63,25 +66,30 @@ class Node(NodeBase):
 
         return
 
+    def is_valid_nte(self, data):
+        if data.landmark in self.table:
+            return False
+        if data.landmark == self: # only landmarks True
+            return False
+        return True
+
+    def is_valid_cor(self, data):
+        # initial correction
+        if self.last_corr == None:
+            return True
+        if self.last_corr.landmark == data.landmark \
+                and self.last_corr.number < data.number:
+            return True
+        return False
+
     def is_valid(self, data):
         # check if packet is node table entry
         if isinstance(data, NodeTEntry):
-            if data.landmark in self.table:
-                return False
-            if data.landmark == self: # only landmarks True
-                return False
-            return True
+            return self.is_valid_nte(data)
 
         # check if packet is correction
         if isinstance(data, Correction):
-            # initial correction
-            if self.last_corr == None:
-                self.last_corr = data
-                return True
-            if self.last_corr.landmark == data.landmark \
-                    and self.last_corr.number < data.number:
-                self.last_corr = data
-                return True
+            return self.is_valid_cor(data)
 
         # invalid packet
         return False
