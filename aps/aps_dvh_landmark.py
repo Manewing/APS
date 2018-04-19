@@ -4,7 +4,7 @@ import random
 import numpy as np
 import pygame
 
-from node import Node
+from aps_dvh_node import Node
 from data import *
 from gbls import *
 
